@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鱼生鱼世</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@200;300&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Background Canvas */
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* Main Content */
+    .content {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Title */
+    .title {
+      font-size: clamp(3rem, 10vw, 8rem);
+      font-weight: 200;
+      letter-spacing: 0.5em;
+      padding-left: 0.5em;
+      color: #1a1a1a;
+      opacity: 0;
+      animation: titleIn 2s ease-out 0.5s forwards;
+    }
+
+    @keyframes titleIn {
+      from { 
+        opacity: 0; 
+        letter-spacing: 1em;
+      }
+      to { 
+        opacity: 1; 
+        letter-spacing: 0.5em;
+      }
+    }
+
+    /* Tagline */
+    .tagline {
+      margin-top: 1.5rem;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      font-weight: 300;
+      color: #888;
+      letter-spacing: 0.4em;
+      opacity: 0;
+      animation: fadeUp 1.5s ease-out 1.5s forwards;
+    }
+
+    /* Slogan */
+    .slogan {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      font-weight: 200;
+      color: #aaa;
+      line-height: 2.5;
+      opacity: 0;
+      animation: fadeUp 1.5s ease-out 2s forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Philosophy Row */
+    .philosophy {
+      display: flex;
+      gap: 4rem;
+      margin-top: 4rem;
+      opacity: 0;
+      animation: fadeUp 1.5s ease-out 2.5s forwards;
+    }
+
+    .philosophy-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .philosophy-item .en {
+      font-size: 0.7rem;
+      color: #ccc;
+      letter-spacing: 0.2em;
+    }
+
+    .philosophy-item .zh {
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: 300;
+    }
+
+    /* Subtle Line */
+    .line {
+      width: 60px;
+      height: 1px;
+      background: #ddd;
+      margin: 4rem auto 0;
+      opacity: 0;
+      animation: fadeUp 1s ease-out 3s forwards;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .philosophy {
+        flex-direction: column;
+        gap: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="ocean"></canvas>
+
+  <div class="content">
+    <h1 class="title">鱼生鱼世</h1>
+    <p class="tagline">简简单单 · 像一条咸鱼就好</p>
+    <p class="slogan">在这纷扰的世界里<br>做一条无忧无虑的鱼</p>
+    
+    <div class="philosophy">
+      <div class="philosophy-item">
+        <span class="en">drift</span>
+        <span class="zh">随波</span>
+      </div>
+      <div class="philosophy-item">
+        <span class="en">idle</span>
+        <span class="zh">躺平</span>
+      </div>
+      <div class="philosophy-item">
+        <span class="en">free</span>
+        <span class="zh">自由</span>
+      </div>
+    </div>
+
+    <div class="line"></div>
+  </div>
+
+  <script>
+    // Canvas Fish Animation
+    const canvas = document.getElementById('ocean');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    let fish = {
+      x: 0,
+      y: 0,
+      angle: 0,
+      targetAngle: 0,
+      speed: 0.5,
+      scale: 1,
+      tailAngle: 0,
+      isChasing: false
+    };
+    let bubbles = [];
+    let foods = []; // Fish food particles
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      // Random initial position with margin
+      const margin = 100;
+      fish.x = margin + Math.random() * (width - margin * 2);
+      fish.y = margin + Math.random() * (height - margin * 2);
+    }
+
+    function initBubbles() {
+      bubbles = [];
+      for (let i = 0; i < 15; i++) {
+        bubbles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          size: Math.random() * 4 + 1,
+          speed: Math.random() * 0.5 + 0.2,
+          opacity: Math.random() * 0.3 + 0.1
+        });
+      }
+    }
+
+    // Draw fish food
+    function drawFood() {
+      foods.forEach(f => {
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(180, 140, 100, ${f.opacity})`;
+        ctx.fill();
+      });
+    }
+
+    // Update fish food - fall down
+    function updateFood() {
+      foods.forEach((f, index) => {
+        f.y += f.speed;
+        f.opacity -= 0.003;
+        
+        // Remove if faded or out of screen
+        if (f.opacity <= 0 || f.y > height + 10) {
+          foods.splice(index, 1);
+        }
+      });
+    }
+
+    // Click to drop food
+    document.addEventListener('click', (e) => {
+      // Add 2 food particles
+      for (let i = 0; i < 2; i++) {
+        foods.push({
+          x: e.clientX + (Math.random() - 0.5) * 30,
+          y: e.clientY,
+          size: Math.random() * 4 + 3,
+          speed: Math.random() * 0.5 + 0.2, // Slower falling
+          opacity: 0.8
+        });
+      }
+      
+      // Enable fish to start looking for food
+      fish.isChasing = true;
+    });
+
+    function drawFish() {
+      ctx.save();
+      ctx.translate(fish.x, fish.y);
+      ctx.rotate(fish.angle);
+      ctx.scale(fish.scale, fish.scale);
+
+      // Body
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 40, 20, 0, 0, Math.PI * 2);
+      const bodyGradient = ctx.createLinearGradient(-40, 0, 40, 0);
+      bodyGradient.addColorStop(0, 'rgba(100, 180, 255, 0.3)');
+      bodyGradient.addColorStop(0.5, 'rgba(150, 220, 255, 0.4)');
+      bodyGradient.addColorStop(1, 'rgba(100, 180, 255, 0.2)');
+      ctx.fillStyle = bodyGradient;
+      ctx.fill();
+
+      // Tail
+      ctx.save();
+      ctx.translate(-35, 0);
+      ctx.rotate(fish.tailAngle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-25, -15);
+      ctx.lineTo(-20, 0);
+      ctx.lineTo(-25, 15);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(100, 180, 255, 0.25)';
+      ctx.fill();
+      ctx.restore();
+
+      // Eye
+      ctx.beginPath();
+      ctx.arc(20, -3, 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(60, 120, 200, 0.5)';
+      ctx.fill();
+
+      // Fins
+      ctx.beginPath();
+      ctx.moveTo(5, -18);
+      ctx.quadraticCurveTo(15, -30, 25, -18);
+      ctx.fillStyle = 'rgba(100, 180, 255, 0.2)';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(5, 18);
+      ctx.quadraticCurveTo(15, 30, 25, 18);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawBubbles() {
+      bubbles.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(150, 200, 255, ${b.opacity})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+    }
+
+    function update() {
+      // If fish is chasing food, find the closest food
+      if (fish.isChasing && foods.length > 0) {
+        let closestFood = null;
+        let closestDist = Infinity;
+        
+        // Find closest food
+        foods.forEach(f => {
+          const dx = f.x - fish.x;
+          const dy = f.y - fish.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closestFood = f;
+          }
+        });
+        
+        if (closestFood) {
+          const dx = closestFood.x - fish.x;
+          const dy = closestFood.y - fish.y;
+          
+          if (closestDist > 15) {
+            fish.targetAngle = Math.atan2(dy, dx);
+            fish.speed = 2.5; // Much faster when chasing food
+          } else {
+            // Ate the food - remove it
+            const foodIndex = foods.indexOf(closestFood);
+            if (foodIndex > -1) {
+              foods.splice(foodIndex, 1);
+            }
+            fish.speed = 0.5; // Back to normal
+          }
+        }
+        
+        // Stop chasing if no food left
+        if (foods.length === 0) {
+          fish.isChasing = false;
+        }
+      } else {
+        // Fish movement - smooth wandering
+        fish.targetAngle = Math.sin(Date.now() * 0.0005) * 0.3 + Math.sin(Date.now() * 0.001) * 0.2;
+        fish.speed = 0.5;
+      }
+      
+      fish.angle += (fish.targetAngle - fish.angle) * 0.05;
+      
+      fish.x += Math.cos(fish.angle) * fish.speed;
+      fish.y += Math.sin(fish.angle) * fish.speed * 0.5;
+
+      // Bounce off edges (with margin)
+      const margin = 80;
+      if (fish.x > width - margin) {
+        fish.x = width - margin;
+        fish.angle = Math.PI - fish.angle;
+        fish.isChasing = false;
+      }
+      if (fish.x < margin) {
+        fish.x = margin;
+        fish.angle = Math.PI - fish.angle;
+        fish.isChasing = false;
+      }
+      if (fish.y > height - margin) {
+        fish.y = height - margin;
+        fish.angle = -fish.angle;
+        fish.isChasing = false;
+      }
+      if (fish.y < margin) {
+        fish.y = margin;
+        fish.angle = -fish.angle;
+        fish.isChasing = false;
+      }
+
+      // Tail animation - faster when chasing
+      fish.tailAngle = Math.sin(Date.now() * (fish.isChasing ? 0.02 : 0.01)) * 0.5;
+
+      // Update bubbles
+      bubbles.forEach(b => {
+        b.y -= b.speed;
+        b.x += Math.sin(Date.now() * 0.001 + b.y * 0.01) * 0.3;
+        if (b.y < -10) {
+          b.y = height + 10;
+          b.x = Math.random() * width;
+        }
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Subtle background gradient
+      const bgGradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width * 0.7);
+      bgGradient.addColorStop(0, 'rgba(248, 250, 252, 0)');
+      bgGradient.addColorStop(1, 'rgba(230, 240, 250, 0.3)');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, width, height);
+
+      drawBubbles();
+      drawFood();
+      updateFood();
+      drawFish();
+      update();
+
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => {
+      resize();
+    });
+
+    resize();
+    initBubbles();
+    animate();
+  </script>
+</body>
+</html>
