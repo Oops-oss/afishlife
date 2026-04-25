@@ -130,6 +130,39 @@
       animation: fadeUp 1s ease-out 3s forwards;
     }
 
+    /* Footer */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 1rem;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .beian {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .beian-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .beian-text {
+      font-size: 0.75rem;
+      color: #999;
+      text-decoration: none;
+    }
+
+    .beian-text:hover {
+      color: #666;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .philosophy {
@@ -163,6 +196,16 @@
     </div>
 
     <div class="line"></div>
+
+    <!-- Footer - ICP备案 -->
+    <footer class="footer">
+      <div class="beian">
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=35042802000119" rel="noreferrer" target="_blank">
+          <img src="beian-icon.png" alt="公安联网备案" class="beian-icon">
+        </a>
+        <a href="https://beian.miit.gov.cn/" target="_blank" class="beian-text">闽ICP备2026008896号</a>
+      </div>
+    </footer>
   </div>
 
   <script>
