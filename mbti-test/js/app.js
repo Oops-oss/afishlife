@@ -399,6 +399,16 @@ function displayResult() {
         document.getElementById('result-growth').textContent = result.growth;
     }
     
+    // Update thinking
+    if (result.thinking) {
+        document.getElementById('result-thinking').textContent = result.thinking;
+    }
+    
+    // Update advice
+    if (result.advice) {
+        document.getElementById('result-advice').textContent = result.advice;
+    }
+    
     // Add result color to gradient background
     resultCard.style.background = 'linear-gradient(135deg, var(--bg-card) 0%, ' + result.color + '15 100%)';
     
@@ -491,6 +501,16 @@ function displayDirectType() {
     // Update growth
     if (result.growth) {
         document.getElementById('result-growth').textContent = result.growth;
+    }
+    
+    // Update thinking
+    if (result.thinking) {
+        document.getElementById('result-thinking').textContent = result.thinking;
+    }
+    
+    // Update advice
+    if (result.advice) {
+        document.getElementById('result-advice').textContent = result.advice;
     }
     
     // Add result color to gradient background

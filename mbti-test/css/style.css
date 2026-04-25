@@ -489,6 +489,19 @@ html, body {
   transform: scaleY(1);
 }
 
+/* Disable hover effects on touch devices to prevent stuck states */
+@media (hover: none) and (pointer: coarse) {
+  .option-item:hover {
+    background: transparent;
+    border-color: rgba(255,255,255,0.08);
+    transform: none;
+  }
+  
+  .option-item:hover::before {
+    transform: scaleY(0);
+  }
+}
+
 .option-item.selected {
   background: linear-gradient(135deg, rgba(76, 214, 163, 0.15) 0%, rgba(74, 162, 255, 0.1) 100%);
   border-color: var(--accent-green);
